@@ -24,6 +24,7 @@ func getCrawlUrl(page int) string {
 
 type JXLCrawler struct {
 	p chan *internal.HttpProxyIP
+	page int
 }
 
 func (c *JXLCrawler) GetProxies()<-chan *internal.HttpProxyIP {
@@ -34,11 +35,8 @@ func (c*JXLCrawler) Close() {
 	close(c.p)
 }
 
-func (c *JXLCrawler) Crawl(page int)error  {
-	if page<1{
-		page =1
-	}
-	crawlUrl:=getCrawlUrl(page)
+func (c *JXLCrawler) Crawl()error  {
+	crawlUrl:=getCrawlUrl(c.page)
 	resp,err:=http.Get(crawlUrl)
 	if err!=nil{
 		return err
@@ -51,11 +49,12 @@ func (c *JXLCrawler) Crawl(page int)error  {
 	doc,err:=goquery.NewDocumentFromReader(bytes.NewReader(body))
 	if err!=nil{
 		return err
-
 	}
-	//var data = make([]*internal.HttpProxyIP,0)
 	trs:= doc.Find("div.ip-tables > div.layui-form > table > tbody >tr")
-	//total := totalIPCountRegExp.FindSubmatch(body)
+	if trs.Length()==0{
+		c.page =1
+	}
+	total := totalIPCountRegExp.FindSubmatch(body)
 	//captionStr:=fmt.Sprintf("proxy ip :%s ,%d",total[1],page)
 	trs.Each(func(i int, selection *goquery.Selection) {
 		tds:=selection.Find("td")
@@ -78,16 +77,18 @@ func (c *JXLCrawler) Crawl(page int)error  {
 			ResponseSpeed:tds.Eq(7).Text(),
 			TTL:tds.Eq(8).Text(),
 			LastValidateTime: tds.Eq(9).Text(),
+			Metadata: map[string]string{
+				"totals":string(total[1]),
+			},
 		}
 		c.p <-proxyItem
-		//data=append(data,proxyItem)
 	})
-	//renderTable(os.Stdout,captionStr,data)
+	c.page =c.page +1
 	return nil
 }
 
 
 func NewJXLCrawler() *JXLCrawler {
-	c:=&JXLCrawler{p: make(chan *internal.HttpProxyIP,10)}
+	c:=&JXLCrawler{p: make(chan *internal.HttpProxyIP,10),page: 1}
 	return c
 }
