@@ -25,6 +25,7 @@ func getCrawlUrl(page int) string {
 type JXLCrawler struct {
 	p chan *internal.HttpProxyIP
 	page int
+
 }
 
 func (c *JXLCrawler) GetProxies()<-chan *internal.HttpProxyIP {
@@ -37,6 +38,7 @@ func (c*JXLCrawler) Close() {
 
 func (c *JXLCrawler) Crawl()error  {
 	crawlUrl:=getCrawlUrl(c.page)
+
 	resp,err:=http.Get(crawlUrl)
 	if err!=nil{
 		return err
@@ -55,7 +57,6 @@ func (c *JXLCrawler) Crawl()error  {
 		c.page =1
 	}
 	total := totalIPCountRegExp.FindSubmatch(body)
-	//captionStr:=fmt.Sprintf("proxy ip :%s ,%d",total[1],page)
 	trs.Each(func(i int, selection *goquery.Selection) {
 		tds:=selection.Find("td")
 		if tds.Length()==1{
@@ -84,6 +85,7 @@ func (c *JXLCrawler) Crawl()error  {
 		c.p <-proxyItem
 	})
 	c.page =c.page +1
+
 	return nil
 }
 

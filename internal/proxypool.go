@@ -1,23 +1,24 @@
 package internal
 
 import (
+
 	"context"
 	"errors"
 	"fmt"
 	"os"
 	"sync"
 	"time"
+
 )
 
 var PoolEmptyError = errors.New("proxy pool is empty")
+
 
 type Crawler interface {
 	GetProxies() <- chan *HttpProxyIP
 	Crawl() error
 	Close()
 }
-
-
 type GetProxyIPStrategy interface {
 	Get([]*HttpProxyIP) (*HttpProxyIP,error)
 }
@@ -35,6 +36,7 @@ func (s *DefaultGetProxyIPStrategy) Get(proxies []*HttpProxyIP) ( *HttpProxyIP,e
 type PollingGetProxyIPStrategy struct {
 	counter int
 }
+
 // Get get proxy IP by polling strategy
 func (s *PollingGetProxyIPStrategy) Get(proxies []*HttpProxyIP)(*HttpProxyIP,error)  {
 	if proxies==nil ||len(proxies)==0{
@@ -137,6 +139,7 @@ func (pool *proxyPool) StartChecker(ctx context.Context,delay time.Duration)  {
 
 	}
 }
+
 func (pool *proxyPool) Get() (*HttpProxyIP,error) {
 	pool._lock.Lock()
 	defer pool._lock.Unlock()

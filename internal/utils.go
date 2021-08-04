@@ -10,12 +10,14 @@ import (
 func RenderTable(writer io.Writer,caption string,data []* HttpProxyIP)  {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"IP", "Port", "Protocol","Location","ISP","ResponseSpeed","TTL","LastCheckedTime","State"})
+
 	table.SetCaption(true, caption)
 	for _, proxyIP := range data {
 		table.Append(proxyIP.ToTableRow())
 	}
 	table.Render()
 }
+
 
 func DelItem(vs []*HttpProxyIP, s *HttpProxyIP) []*HttpProxyIP{
 	for i := 0; i < len(vs); i++ {
@@ -26,3 +28,4 @@ func DelItem(vs []*HttpProxyIP, s *HttpProxyIP) []*HttpProxyIP{
 	}
 	return vs
 }
+
