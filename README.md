@@ -1,4 +1,4 @@
-# HTTP IP proxy Pool
+# HTTP IP proxy pool
 
 
 ```shell
