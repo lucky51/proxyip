@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-
-type ProxyIPStatus  uint8
+type ProxyIPStatus uint8
 
 const (
-	ProxyIPStatusOk = 200
-	ProxyIPStatusError =201
+	ProxyIPStatusOk    = 200
+	ProxyIPStatusError = 201
 )
+
 // HttpProxyIP proxy ip item
 type HttpProxyIP struct {
 	Port             int
@@ -28,49 +28,50 @@ type HttpProxyIP struct {
 	TTL              string
 	LastValidateTime string
 	Metadata         map[string]string
-	LastCheckedTime 	 time.Time
+	LastCheckedTime  time.Time
 	LastCheckedState ProxyIPStatus
 }
+
 // ToTableRow map to a table row
-func (ip * HttpProxyIP) ToTableRow() []string {
-	state:=""
-	lastCheckedTime:=ip.LastCheckedTime.Format("15:04:05.000")
-	if ip.LastCheckedState == ProxyIPStatusOk{
-		state="ok"
-	}else if ip.LastCheckedState==00{
-		state="--"
-		lastCheckedTime ="--"
+func (ip *HttpProxyIP) ToTableRow() []string {
+	state := ""
+	lastCheckedTime := ip.LastCheckedTime.Format("15:04:05.000")
+	if ip.LastCheckedState == ProxyIPStatusOk {
+		state = "ok"
+	} else if ip.LastCheckedState == 00 {
+		state = "--"
+		lastCheckedTime = "--"
 	}
-	return []string{ip.IP,strconv.Itoa(ip.Port),ip.Anonymity,ip.HttpProtocol,ip.Location,ip.ISP,ip.ResponseSpeed,ip.TTL,lastCheckedTime,state}
+	return []string{ip.IP, strconv.Itoa(ip.Port), ip.Anonymity, ip.HttpProtocol, ip.Location, ip.ISP, ip.ResponseSpeed, ip.TTL, lastCheckedTime, state}
 }
-func CheckProxyIP(protocol string,ip string,port int,validUrl string) (string,error)  {
-	if port==0{
-		port =80
+func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string, error) {
+	if port == 0 {
+		port = 80
 	}
-	if protocol==""{
-		protocol="http"
+	if protocol == "" {
+		protocol = "http"
 	}
-	proxyUrlStr:=fmt.Sprintf("%s://%s:%d",protocol,ip,port)
-	proxyUrl,err:=url.Parse(proxyUrlStr)
-	if err!=nil {
-		return "",err
+	proxyUrlStr := fmt.Sprintf("%s://%s:%d", protocol, ip, port)
+	proxyUrl, err := url.Parse(proxyUrlStr)
+	if err != nil {
+		return "", err
 	}
-	newTrans:=&http.Transport{
-		Proxy: http.ProxyURL(proxyUrl),
-		ResponseHeaderTimeout: time.Second *10,
+	newTrans := &http.Transport{
+		Proxy:                 http.ProxyURL(proxyUrl),
+		ResponseHeaderTimeout: time.Second * 10,
 	}
-	client:=http.Client{
-		Transport:newTrans,
-		Timeout: time.Second*10,
+	client := http.Client{
+		Transport: newTrans,
+		Timeout:   time.Second * 10,
 	}
-	resp,err:=client.Get(validUrl)
-	if err!=nil{
+	resp, err := client.Get(validUrl)
+	if err != nil {
 		return "", err
 	}
 	defer resp.Body.Close()
-	body,err:=ioutil.ReadAll(resp.Body)
-	if err!=nil{
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
 		return "", err
 	}
-	return string(body),nil
+	return string(body), nil
 }

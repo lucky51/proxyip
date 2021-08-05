@@ -2,8 +2,11 @@
 
 
 ```shell
+//install
+go install github.com/lucky51/proxyip
+proxyip pool --serve -p=8081
 // start a proxy pool and serve http
-go run main.go pool --serve -p=8081
+// go run main.go pool --serve -p=8081
 ```
 
 
