@@ -3,13 +3,12 @@ package internal
 import (
 	"github.com/olekukonko/tablewriter"
 	"io"
-	"os"
 )
 
 // RenderTable render proxy ip table
 func RenderTable(writer io.Writer,caption string,data []* HttpProxyIP)  {
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"IP", "Port", "Protocol","Location","ISP","ResponseSpeed","TTL","LastCheckedTime","State"})
+	table := tablewriter.NewWriter(writer)
+	table.SetHeader([]string{"IP", "Port", "Anonymity","Protocol","Location","ISP","ResponseSpeed","TTL","LastCheckedTime","State"})
 
 	table.SetCaption(true, caption)
 	for _, proxyIP := range data {

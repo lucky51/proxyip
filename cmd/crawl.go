@@ -1,16 +1,11 @@
 package cmd
 
 import (
-
-	"context"
-
 	"fmt"
 	"github.com/lucky51/proxyip/crawler"
 	"github.com/lucky51/proxyip/internal"
 	"github.com/spf13/cobra"
 	"os"
-	"time"
-
 )
 
 var  page int
@@ -21,27 +16,20 @@ var crawlCmd =  &cobra.Command{
 		var forever = make(chan bool)
 		c:=crawler.NewJXLCrawler()
 
-		pool:=internal.NewProxyPool(&internal.PollingGetProxyIPStrategy{})
-
-		ctx,_:=context.WithCancel(context.Background())
-		go pool.StartChecker(ctx,time.Second *5)
-		go pool.StartCollector(ctx,c,time.Second *2)
-
-		fmt.Println("starting get proxy ip from pool")
-		<-forever
-		var data = make([]*internal.HttpProxyIP,4)
-		for i:=0;i<4;i++ {
-			item,err:=pool.Get()
-			if err!=nil{
-				break
+		defer c.Close()
+		go c.Crawl()
+		go func() {
+			var proxies = make([]*internal.HttpProxyIP,0)
+			for  proxyIp := range c.GetProxies() {
+				proxies =append(proxies,proxyIp)
 			}
-			data[i] = item
-		}
-		internal.RenderTable(os.Stdout,"polling get proxy ip",data)
+			internal.RenderTable(os.Stdout,"crawl proxy ip list",proxies)
+			forever<-true
+		}()
 
+		<-forever
 		fmt.Println("blocking this,ctrl c exit.")
 		select{}
-
 	},
 }
 

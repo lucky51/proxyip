@@ -1,18 +1,15 @@
 package internal
 
 import (
-
 	"context"
 	"errors"
 	"fmt"
 	"os"
 	"sync"
 	"time"
-
 )
 
 var PoolEmptyError = errors.New("proxy pool is empty")
-
 
 type Crawler interface {
 	GetProxies() <- chan *HttpProxyIP
@@ -57,7 +54,7 @@ type proxyPool struct {
 	proxies []*HttpProxyIP
 	s GetProxyIPStrategy
 }
-
+// StartCollector start a collector to crawl proxy ip
 func (pool* proxyPool) StartCollector(ctx context.Context,c Crawler,delay time.Duration)  {
 	fmt.Println("starting proxy ip collector...")
 	if delay==0{
@@ -72,9 +69,10 @@ func (pool* proxyPool) StartCollector(ctx context.Context,c Crawler,delay time.D
 				case t:=<-time.After(delay):
 					fmt.Println("collector:started by:",t.Format(time.Kitchen))
 					if len(pool.proxies) < pool._available{
+						fmt.Printf("pool available ip %d < (%d) \n",len(pool.proxies),pool._available)
 						c.Crawl()
 					}else{
-						fmt.Printf("ignore crawl, pool available ip %d < (%d) \n",len(pool.proxies),pool._available)
+						fmt.Printf("ignore crawl, pool available ip %d >= (%d) \n",len(pool.proxies),pool._available)
 					}
 					case <-ctx.Done():
 						fmt.Println("notify exit collector.")
@@ -92,7 +90,7 @@ func (pool* proxyPool) StartCollector(ctx context.Context,c Crawler,delay time.D
 					break
 				}
 			}
-			if !existsIP{
+			if !existsIP && len(pool.proxies)<pool._available{
 				pool.Set(ip)
 			}
 		}
@@ -103,9 +101,16 @@ func (pool* proxyPool) StartCollector(ctx context.Context,c Crawler,delay time.D
 // StartChecker start a proxy ip checker ,this started by another go routine  in most cases
 func (pool *proxyPool) StartChecker(ctx context.Context,delay time.Duration)  {
 	fmt.Println("starting proxy ip checker...")
+	var first =true
+	if delay ==0{
+		delay =time.Second *20
+	}
+	afterFirstDelay:=delay
 	for  {
-		if delay ==0{
-			delay =time.Second *20
+		if first{
+			delay =0
+		}else{
+			delay = afterFirstDelay
 		}
 		select {
 			case t:= <-time.After(delay):
@@ -117,26 +122,27 @@ func (pool *proxyPool) StartChecker(ctx context.Context,delay time.Duration)  {
 					proxy.LastCheckedTime =t
 					if err!=nil{
 						proxy.LastCheckedState = ProxyIPStatusError
-						fmt.Printf("checked result:%v \n",err)
+						fmt.Println("checked result error")
 					}else{
 						proxy.LastCheckedState =ProxyIPStatusOk
 						fmt.Printf("checked result:%s \n",result)
 					}
 				}
-				// TODO: 清除无效的IP
-				// var availablePIP
-				for _,p := range pool.proxies {
-					if p.LastCheckedState == ProxyIPStatusOk{
-
+				// clear invalid proxy ip
+				var temp =pool.proxies[:0]
+				for _, proxy := range pool.proxies {
+					if proxy.LastCheckedState == ProxyIPStatusOk{
+						temp =append(temp,proxy)
 					}
 				}
+				pool.proxies =temp
 				pool._lock.Unlock()
 				RenderTable(os.Stdout,fmt.Sprintf("proxy ip checker,started by:%s",time.Now().Format(time.Kitchen)),pool.proxies)
 			case <-ctx.Done():
 				fmt.Println("proxy ip checker is canceled")
 				return
 		}
-
+		first = false
 	}
 }
 
@@ -144,6 +150,13 @@ func (pool *proxyPool) Get() (*HttpProxyIP,error) {
 	pool._lock.Lock()
 	defer pool._lock.Unlock()
 	return pool.s.Get(pool.proxies)
+}
+
+func (pool *proxyPool) GetAll() ([]*HttpProxyIP,error) {
+	if pool.proxies ==nil || len(pool.proxies) ==0{
+		return pool.proxies,PoolEmptyError
+	}
+	return pool.proxies,nil
 }
 
 func (pool* proxyPool) Set(proxy *HttpProxyIP)  {
@@ -154,7 +167,7 @@ func (pool* proxyPool) Set(proxy *HttpProxyIP)  {
 func NewProxyPool(strategy GetProxyIPStrategy) *proxyPool {
 	pool:=&proxyPool{
 		s: strategy,
-		_available: 20,
+		_available: 10,
 		proxies: make([]*HttpProxyIP,0),
 	}
 	return pool

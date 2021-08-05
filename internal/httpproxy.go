@@ -16,7 +16,7 @@ const (
 	ProxyIPStatusOk = 200
 	ProxyIPStatusError =201
 )
-
+// HttpProxyIP proxy ip item
 type HttpProxyIP struct {
 	Port             int
 	IP               string
@@ -31,14 +31,17 @@ type HttpProxyIP struct {
 	LastCheckedTime 	 time.Time
 	LastCheckedState ProxyIPStatus
 }
+// ToTableRow map to a table row
 func (ip * HttpProxyIP) ToTableRow() []string {
 	state:=""
+	lastCheckedTime:=ip.LastCheckedTime.Format("15:04:05.000")
 	if ip.LastCheckedState == ProxyIPStatusOk{
 		state="ok"
-	}else{
-		state="error"
+	}else if ip.LastCheckedState==00{
+		state="--"
+		lastCheckedTime ="--"
 	}
-	return []string{ip.IP,strconv.Itoa(ip.Port),ip.Anonymity,ip.Location,ip.ISP,ip.ResponseSpeed,ip.TTL,ip.LastCheckedTime.Format(time.Kitchen),state}
+	return []string{ip.IP,strconv.Itoa(ip.Port),ip.Anonymity,ip.HttpProtocol,ip.Location,ip.ISP,ip.ResponseSpeed,ip.TTL,lastCheckedTime,state}
 }
 func CheckProxyIP(protocol string,ip string,port int,validUrl string) (string,error)  {
 	if port==0{

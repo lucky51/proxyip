@@ -89,7 +89,7 @@ func (c *JXLCrawler) Crawl()error  {
 	return nil
 }
 
-
+// NewJXLCrawler create crawler instance
 func NewJXLCrawler() *JXLCrawler {
 	c:=&JXLCrawler{p: make(chan *internal.HttpProxyIP,10),page: 1}
 	return c
