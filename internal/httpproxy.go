@@ -41,10 +41,26 @@ func (ip *HttpProxyIP) ToTableRow() []string {
 	} else if ip.LastCheckedState == 00 {
 		state = "--"
 		lastCheckedTime = "--"
+	}else{
+		state="error"
 	}
-	return []string{ip.IP, strconv.Itoa(ip.Port), ip.Anonymity, ip.HttpProtocol, ip.Location, ip.ISP, ip.ResponseSpeed, ip.TTL, lastCheckedTime, state}
+	return []string{
+		ip.IP,
+		strconv.Itoa(ip.Port),
+		ip.Anonymity,
+		ip.HttpProtocol,
+		ip.Location,
+		ip.ISP,
+		ip.ResponseSpeed,
+		ip.TTL,
+		lastCheckedTime,
+		state,
+		fmt.Sprintf("t=%s,p=%s",ip.Metadata["totals"],ip.Metadata["page"]),
+	}
 }
-func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string, error) {
+
+// CheckProxyIP check proxy ip status
+func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string,int, error) {
 	if port == 0 {
 		port = 80
 	}
@@ -54,7 +70,7 @@ func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string
 	proxyUrlStr := fmt.Sprintf("%s://%s:%d", protocol, ip, port)
 	proxyUrl, err := url.Parse(proxyUrlStr)
 	if err != nil {
-		return "", err
+		return "",0, err
 	}
 	newTrans := &http.Transport{
 		Proxy:                 http.ProxyURL(proxyUrl),
@@ -66,12 +82,12 @@ func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string
 	}
 	resp, err := client.Get(validUrl)
 	if err != nil {
-		return "", err
+		return "", 0,err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", err
+		return "", resp.StatusCode,err
 	}
-	return string(body), nil
+	return string(body), resp.StatusCode,nil
 }

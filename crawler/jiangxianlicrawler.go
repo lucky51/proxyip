@@ -38,7 +38,6 @@ func (c*JXLCrawler) Close() {
 
 func (c *JXLCrawler) Crawl()error  {
 	crawlUrl:=getCrawlUrl(c.page)
-
 	resp,err:=http.Get(crawlUrl)
 	if err!=nil{
 		return err
@@ -80,6 +79,7 @@ func (c *JXLCrawler) Crawl()error  {
 			LastValidateTime: tds.Eq(9).Text(),
 			Metadata: map[string]string{
 				"totals":string(total[1]),
+				"page":strconv.Itoa(c.page),
 			},
 		}
 		c.p <-proxyItem
@@ -90,7 +90,10 @@ func (c *JXLCrawler) Crawl()error  {
 }
 
 // NewJXLCrawler create crawler instance
-func NewJXLCrawler() *JXLCrawler {
-	c:=&JXLCrawler{p: make(chan *internal.HttpProxyIP,10),page: 1}
+func NewJXLCrawler(page int) *JXLCrawler {
+	if page <1{
+		page =1
+	}
+	c:=&JXLCrawler{p: make(chan *internal.HttpProxyIP,10),page: page}
 	return c
 }

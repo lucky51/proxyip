@@ -14,21 +14,25 @@ var crawlCmd =  &cobra.Command{
 	Short:"crawl proxy ip",
 	Run: func(cmd *cobra.Command, args []string) {
 		var forever = make(chan bool)
-		c:=crawler.NewJXLCrawler()
-
-		defer c.Close()
-		go c.Crawl()
+		fmt.Println("instance crawler")
+		c:=crawler.NewJXLCrawler(page)
+		fmt.Println("starting crawl")
+		go func() {
+			// notify receiver goroutine exit
+			defer c.Close()
+			c.Crawl()
+		}()
+		fmt.Println("starting receive proxy ip from channel")
 		go func() {
 			var proxies = make([]*internal.HttpProxyIP,0)
 			for  proxyIp := range c.GetProxies() {
 				proxies =append(proxies,proxyIp)
 			}
-			internal.RenderTable(os.Stdout,"crawl proxy ip list",proxies)
+			internal.RenderProxyIPTable(os.Stdout,"crawl proxy ip list",proxies)
 			forever<-true
 		}()
-
 		<-forever
-		fmt.Println("blocking this,ctrl c exit.")
+		fmt.Println("ctrl c exit.")
 		select{}
 	},
 }
