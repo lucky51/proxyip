@@ -150,7 +150,7 @@ func (pool *proxyPool) StartChecker(ctx context.Context) {
 				proxy.LastCheckedTime = t
 				if err != nil {
 					proxy.LastCheckedState = ProxyIPStatusError
-					fmt.Println("checked result error,http status code:", s)
+					fmt.Println("checked result error,http status code:", s,"error:",err)
 				} else {
 					if s != http.StatusOK || len(result) > 15 {
 						proxy.LastCheckedState = ProxyIPStatusError

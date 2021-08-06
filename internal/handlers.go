@@ -50,7 +50,7 @@ func IndexHandler() gin.HandlerFunc {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proxy IP pool</title>
+    <title>Proxy IP Pool</title>
     <style>
         /* For mobile phones: */
         [class*="col-"] {
@@ -179,11 +179,11 @@ func IndexHandler() gin.HandlerFunc {
 </head>
 
 <body>
-    <h1>Proxy IP pool</h1>
+    <h1>Proxy IP Pool</h1>
     <hr>
     <a href="/proxies" target="_blank" class="col-m-12 col-3">Proxy IP table</a>
     <a href="/ip" target="_blank" class="col-m-12 col-3">Get Proxy IP by the current strategy</a>
-    <a href="/configuration" class="col-m-12 col-3">Get current IP Pool configurations table</a>
+    <a href="/configuration" target="_blank" class="col-m-12 col-3">Get current IP Pool configurations table</a>
 </body>
 
 </html>

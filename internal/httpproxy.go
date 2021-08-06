@@ -81,13 +81,17 @@ func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string
 		Timeout:   time.Second * 10,
 	}
 	resp, err := client.Get(validUrl)
+	var status =0
+	if resp!=nil{
+		status =resp.StatusCode
+	}
 	if err != nil {
-		return "", 0,err
+		return "", status,err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", resp.StatusCode,err
+		return "", status,err
 	}
-	return string(body), resp.StatusCode,nil
+	return string(body), status,nil
 }

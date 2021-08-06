@@ -21,10 +21,13 @@ proxyip crawl -p=1
 
 ```shell
 //get all available proxies
-curl http://localhost:8081
+curl http://localhost:8081/proxies
 
 //get a proxy ip by polling strategy
 curl http://localhost:8081/ip
+
+//get configurations
+curl http://localhost:8081/configuration
 ```
 
 ![home page](https://github.com/lucky51/proxyip/blob/main/screenshots/home.jpg)
