@@ -8,7 +8,7 @@ import (
 
 //var pool = NewProxyPool(&PollingGetProxyIPStrategy{})
 
-func GetIPListHandler(pool *proxyPool) gin.HandlerFunc{
+func HandleGetIPList(pool *proxyPool) gin.HandlerFunc{
 	return func(c *gin.Context) {
 		ips,err:=pool.GetAll()
 		if err!=nil{
@@ -19,7 +19,7 @@ func GetIPListHandler(pool *proxyPool) gin.HandlerFunc{
 	}
 }
 
-func GetIPHandler(pool *proxyPool) gin.HandlerFunc {
+func HandleGetIP(pool *proxyPool) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		ip,err:=pool.Get()
 		if err!=nil{
@@ -31,15 +31,15 @@ func GetIPHandler(pool *proxyPool) gin.HandlerFunc {
 		})
 	}
 }
-// GetConfigurations get proxy pool configurations
-func GetConfigurations(pool *proxyPool)gin.HandlerFunc {
+// HandleGetConfigurations get proxy pool configurations
+func HandleGetConfigurations(pool *proxyPool)gin.HandlerFunc {
 	return func(c *gin.Context) {
 		 config:=*pool.c
 		 RenderConfigTable(c.Writer,"proxy ip pool configurations",config)
 	}
 }
 
-func IndexHandler() gin.HandlerFunc {
+func HandleGetIPIndexPage() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Content-Type","text/html; charset=utf-8")
 		indexBody:=`
