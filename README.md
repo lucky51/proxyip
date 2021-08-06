@@ -1,4 +1,4 @@
-# HTTP IP proxy pool
+# HTTP IP Proxy Pool
 
 http ip proxy pool
 ## Usage
