@@ -49,6 +49,6 @@ func init() {
 	poolCmd.Flags().BoolVarP(&serve,"serve","s",true,"serve http")
 	poolCmd.Flags().IntVarP(&port,"port","p",8081,"port")
 	poolCmd.Flags().IntVarP(&delaySecOfCollector,"dcc","c",60,"delay of collector (second).")
-	poolCmd.Flags().IntVarP(&delaySecOfChecker,"dck","k",60,"delay of collector (second).")
+	poolCmd.Flags().IntVarP(&delaySecOfChecker,"dck","k",60,"delay of checker (second).")
 	poolCmd.Flags().IntVarP(&alarmValue,"alarm","a",20,"alarm value")
 }
