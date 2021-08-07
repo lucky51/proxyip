@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,6 +16,8 @@ const (
 	ProxyIPStatusOk    = 200
 	ProxyIPStatusError = 201
 )
+
+const DefaultIPCheckUrl  = "http://icanhazip.com"
 
 // HttpProxyIP proxy ip item
 type HttpProxyIP struct {
@@ -58,29 +61,24 @@ func (ip *HttpProxyIP) ToTableRow() []string {
 		fmt.Sprintf("t=%s,p=%s",ip.Metadata["totals"],ip.Metadata["page"]),
 	}
 }
-
-// CheckProxyIP check proxy ip status
-func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string,int, error) {
-	if port == 0 {
-		port = 80
-	}
-	if protocol == "" {
-		protocol = "http"
-	}
-	proxyUrlStr := fmt.Sprintf("%s://%s:%d", protocol, ip, port)
+func CheckProxyUrl(proxyUrlStr,validUrl string) (string,int,error) {
 	proxyUrl, err := url.Parse(proxyUrlStr)
 	if err != nil {
 		return "",0, err
 	}
 	newTrans := &http.Transport{
 		Proxy:                 http.ProxyURL(proxyUrl),
-		ResponseHeaderTimeout: time.Second * 10,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		MaxIdleConnsPerHost: 50,
+		ResponseHeaderTimeout: 10 * time.Second,
 	}
 	client := http.Client{
 		Transport: newTrans,
-		Timeout:   time.Second * 10,
+		Timeout:   time.Second*10,
 	}
-	resp, err := client.Get(validUrl)
+	request, _ := http.NewRequest("GET", validUrl, nil)
+	request.Header.Add("accept", "text/plain")
+	resp, err := client.Do(request)
 	var status =0
 	if resp!=nil{
 		status =resp.StatusCode
@@ -94,4 +92,15 @@ func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string
 		return "", status,err
 	}
 	return string(body), status,nil
+}
+// CheckProxyIP check proxy ip status
+func CheckProxyIP(protocol string, ip string, port int, validUrl string) (string,int, error) {
+	if port == 0 {
+		port = 80
+	}
+	if protocol == "" {
+		protocol = "http"
+	}
+	proxyUrlStr := fmt.Sprintf("%s://%s:%d", protocol, ip, port)
+	return CheckProxyUrl(proxyUrlStr,validUrl)
 }

@@ -8,6 +8,7 @@ var rootCmd = cobra.Command{}
 func init() {
 	rootCmd.AddCommand(crawlCmd)
 	rootCmd.AddCommand(poolCmd)
+	rootCmd.AddCommand(checkCmd)
 }
 
 func Execute()error  {

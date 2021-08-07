@@ -17,6 +17,8 @@ go run main.go pool --serve -p=8081
 //other command 
 // run a crawler without proxy pool,page is optional ,defalut 1
 proxyip crawl -p=1 
+// request a URL to validate  proxy IP,default http://icanhazip.com
+proxyip check --proxy=<proxy ip> -u=<target>
 ```
 
 ```shell

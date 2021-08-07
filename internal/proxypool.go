@@ -146,7 +146,7 @@ func (pool *proxyPool) StartChecker(ctx context.Context) {
 			for _, proxy := range pool.proxies {
 				fmt.Println("starting check proxy ip:", proxy.IP)
 
-				result, s, err := CheckProxyIP(proxy.HttpProtocol, proxy.IP, proxy.Port, "http://icanhazip.com")
+				result, s, err := CheckProxyIP(proxy.HttpProtocol, proxy.IP, proxy.Port, DefaultIPCheckUrl)
 				proxy.LastCheckedTime = t
 				if err != nil {
 					proxy.LastCheckedState = ProxyIPStatusError

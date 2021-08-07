@@ -23,9 +23,12 @@ var poolCmd = &cobra.Command{
 	Short:"create proxy ip pool",
 	Run: func(cmd *cobra.Command, args []string) {
 		var forever = make(chan bool)
+		if alarmValue <1{
+			alarmValue =10
+		}
 		c:=crawler.NewJXLCrawler(1)
 		pool:=internal.NewProxyPool(&internal.ProxyPoolConfig{
-			AlarmValue:       20,
+			AlarmValue:       alarmValue,
 			DelayOfChecker:   time.Second * time.Duration(delaySecOfChecker),
 			DelayOfCollector: time.Second * time.Duration(delaySecOfCollector),
 			GetProxyStrategy: &internal.PollingGetProxyIPStrategy{},
@@ -50,5 +53,5 @@ func init() {
 	poolCmd.Flags().IntVarP(&port,"port","p",8081,"port")
 	poolCmd.Flags().IntVarP(&delaySecOfCollector,"dcc","c",60,"delay of collector (second).")
 	poolCmd.Flags().IntVarP(&delaySecOfChecker,"dck","k",60,"delay of checker (second).")
-	poolCmd.Flags().IntVarP(&alarmValue,"alarm","a",20,"alarm value")
+	poolCmd.Flags().IntVarP(&alarmValue,"alarm","a",10,"alarm value")
 }
