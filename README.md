@@ -38,3 +38,5 @@ curl http://localhost:8081/configuration
 
 * [Gin Web Framework](https://github.com/gin-gonic/gin) 
 * [ASCII Table Writer](https://github.com/olekukonko/tablewriter)
+* [cobra A Commander for modern Go CLI interactions](https://github.com/spf13/cobra)
+* [goquery - a little like that j-thing, only in Go](https://github.com/PuerkitoBio/goquery) 
